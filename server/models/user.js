@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 const bcyrpt = require("bcryptjs");
 
+// minister -> _id, Number of votes/Cannot see who have voted,
+// user -> Vote once
+
+// enum as one of the validators
+
 const userSchema = mongoose.Schema({
   first_name: {
     type: String,
@@ -32,6 +37,29 @@ const userSchema = mongoose.Schema({
   aadhar: {
     type: String,
   },
+  role: {
+    type: String,
+    enum: ["user", "minister"],
+    default: "user",
+  },
+  num_of_votes: {
+    type: Number,
+    default: function () {
+      return this.role === "minister" ? 0 : undefined;
+    },
+    required: function () {
+      return this.role === "minister" ? true : false;
+    },
+  },
+  hasVoted: {
+    type: Boolean,
+    default: function () {
+      return this.role === "user" ? false : undefined;
+    },
+    required: function () {
+      return this.role === "user" ? true : false;
+    },
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -44,7 +72,10 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.pre("findOneAndUpdate", async function (next) {
-  this._update.password = await bcyrpt.hash(this._update.password, 10);
+  if (this._update.password) {
+    this._update.password = await bcyrpt.hash(this._update.password, 10);
+    next();
+  }
   next();
 });
 

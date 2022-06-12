@@ -85,3 +85,56 @@ exports.updatePassword = async (req, res) => {
     }
   }
 };
+
+// Get All Ministers
+exports.getMinisters = async (req, res) => {
+  const allMinisters = await userSchema.find({ role: "minister" });
+  res.status(200).json({
+    success: true,
+    data: allMinisters,
+  });
+};
+
+// Vote Minister
+
+exports.voteMinister = async (req, res) => {
+  const Mid = req.params.id;
+  const { Uid } = req.body;
+
+  if (
+    !mongoose.Types.ObjectId.isValid(Mid) ||
+    !mongoose.Types.ObjectId.isValid(Uid)
+  ) {
+    res.status(404).json({
+      success: false,
+      message: "No user Exists",
+    });
+  } else {
+    const { hasVoted } = await userSchema.findById(Uid);
+
+    if (hasVoted) {
+      res.status(404).json({
+        success: false,
+        message: "You have already voted",
+      });
+    } else {
+      await userSchema.findByIdAndUpdate(
+        Mid,
+        {
+          $inc: { num_of_votes: 1 },
+        },
+        { new: true }
+      );
+      const user = await userSchema.findByIdAndUpdate(
+        Uid,
+        {
+          $set: { hasVoted: true },
+        },
+        { new: true }
+      );
+      res.status(200).json({
+        success: true,
+      });
+    }
+  }
+};

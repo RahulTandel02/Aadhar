@@ -1,11 +1,22 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import TextInput from "./shared/textInput";
+import Vote from "./Vote";
+
+// Error Handling
 
 import Context from "./Context";
 const User = () => {
   const navigate = useNavigate();
   const [user, setUser] = useContext(Context);
+
+  useEffect(() => {
+    if (!user.isLoggedin) {
+      navigate("/");
+    }
+  }, []);
+
   const [password, setPassword] = useState({
     password: "",
   });
@@ -29,7 +40,7 @@ const User = () => {
   };
 
   const updatePassword = async () => {
-    if (!password) {
+    if (password["password"].length === 0 || !password["password"]) {
       alert("Please Enter New Password");
     } else {
       try {
@@ -38,6 +49,9 @@ const User = () => {
       } catch (error) {
         alert("Something went wrong");
       }
+      setPassword({
+        password: "",
+      });
       document.getElementById("id").style.display = "none";
       document.getElementById("main").style.display = "block";
     }
@@ -47,30 +61,19 @@ const User = () => {
     <>
       <div className="login-section" id="main">
         <h1>User</h1>
-        <div className="textinput">
-          <label>Name </label>
-          <input
-            type={"text"}
-            value={user?.first_name + " " + user?.last_name}
-            readOnly
-          />
-        </div>
-        <div className="textinput">
-          <label>Email </label>
-          <input type={"text"} value={user?.email} readOnly />
-        </div>
-        <div className="textinput">
-          <label>Phone </label>
-          <input type={"text"} value={user?.phone} readOnly />
-        </div>
-        <div className="textinput">
-          <label>Address </label>
-          <input type={"text"} value={user?.address} readOnly />
-        </div>
-        <div className="textinput">
-          <label>Aadhar Number </label>
-          <input type={"text"} value={user?.aadhar} readOnly />
-        </div>
+        <TextInput placeholder={"first name"} readOnly={true} />
+        <TextInput placeholder={"last name"} readOnly={true} />
+        <TextInput placeholder={"email"} readOnly={true} />
+        <TextInput placeholder={"phone"} readOnly={true} />
+        <TextInput placeholder={"address"} readOnly={true} />
+        <TextInput placeholder={"aadhar"} readOnly={true} />
+        {user.role === "minister" ? (
+          <TextInput placeholder={"num of votes"} readOnly={true} />
+        ) : (
+          <>
+            <Vote />
+          </>
+        )}
         <button className="submit" onClick={handleLogout}>
           Logout
         </button>
@@ -84,7 +87,7 @@ const User = () => {
           type={"password"}
           placeholder="New Password"
           value={password["password"]}
-          onChange={(e) => setPassword({ password: e.target.value })}
+          onChange={(e) => setPassword({ password: e.target.value.trim() })}
         />
         <input type={"submit"} className="submit" onClick={updatePassword} />
       </div>

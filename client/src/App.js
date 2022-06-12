@@ -15,6 +15,7 @@ function App() {
     phone: "",
     isAdmin: false,
     isLoggedin: false,
+    role: "user",
   });
   return (
     <div className="App">

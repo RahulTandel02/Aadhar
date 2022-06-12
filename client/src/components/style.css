@@ -29,6 +29,7 @@
 
 .textinput label{
     margin: 0 20px;
+    text-transform: capitalize;
 }
 .textinput input, textarea{
     border: none;
@@ -57,4 +58,7 @@
 }
 .update{
     display: none;
+}
+.vote{
+    margin-left: 10%;
 }
